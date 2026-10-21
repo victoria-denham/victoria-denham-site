@@ -1,0 +1,508 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Case Study — Data Management Redesign | Victoria Denham</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Poppins:ital,wght@0,300;0,400;0,500;0,600;0,700;1,400&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg:       #F9F5ED;
+  --ink:      #252F38;
+  --surface:  #F2DAAC;
+  --gold:     #D9A13B;
+  --accent:   #FF2D9E;
+  --accent-2: #00A3FF;
+  --olive:    #2D4A6B;
+  --font:     'Poppins', system-ui, sans-serif;
+
+  --text-xs:  0.75rem;
+  --text-sm:  0.875rem;
+  --text-md:  1.0625rem;
+  --text-lg:  1.375rem;
+  --text-xl:  1.875rem;
+  --text-2xl: 2.5rem;
+  --text-3xl: 3rem;
+
+  --sp-1: 0.25rem;  --sp-2: 0.5rem;   --sp-3: 0.75rem;  --sp-4: 1rem;
+  --sp-5: 1.25rem;  --sp-6: 1.5rem;   --sp-8: 2rem;     --sp-10: 2.5rem;
+  --sp-12: 3rem;    --sp-16: 4rem;    --sp-20: 5rem;
+
+  --divider:       color-mix(in srgb, var(--ink) 12%, transparent);
+  --divider-light: color-mix(in srgb, var(--ink) 7%,  transparent);
+  --ink-muted:     color-mix(in srgb, var(--ink) 50%, transparent);
+  --ink-faint:     color-mix(in srgb, var(--ink) 35%, transparent);
+}
+
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+html { font-size: 100%; scroll-behavior: smooth; }
+body {
+  font-family: var(--font);
+  font-size: var(--text-md);
+  font-weight: 400;
+  line-height: 1.65;
+  color: var(--ink);
+  background: var(--bg);
+  -webkit-font-smoothing: antialiased;
+  position: relative;
+}
+body::before {
+  content: '';
+  position: fixed;
+  inset: 0;
+  background-image: url('../../ClearPath/Website/texture.jpg');
+  background-size: cover;
+  background-repeat: repeat;
+  opacity: 0.25;
+  pointer-events: none;
+  z-index: 0;
+}
+body > * { position: relative; z-index: 1; }
+h1, h2, h3, h4 { font-family: var(--font); color: var(--ink); }
+a { color: var(--accent-2); }
+strong { font-weight: 700; }
+
+.reveal { opacity: 0; transform: translateY(18px); transition: opacity .5s ease, transform .5s ease; }
+.reveal.visible { opacity: 1; transform: none; }
+
+.page { max-width: 1200px; margin: 0 auto; padding: 0 var(--sp-8); }
+@media (max-width: 600px) { .page { padding: 0 var(--sp-4); } }
+
+/* NAV */
+.nav {
+  display: flex;
+  align-items: center;
+  gap: var(--sp-6);
+  padding: var(--sp-4) 0;
+  border-bottom: 1px solid var(--divider);
+  flex-wrap: wrap;
+}
+.nav-brand {
+  font-size: 1.1rem;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+  color: var(--ink);
+  margin-right: auto;
+  text-decoration: none;
+}
+.nav-brand span {
+  background: linear-gradient(135deg, #00A3FF, #FF2D9E);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+.nav-link {
+  font-size: var(--text-xs);
+  font-weight: 600;
+  letter-spacing: 0.07em;
+  text-transform: uppercase;
+  text-decoration: none;
+  color: var(--ink-muted);
+}
+.nav-link:hover { color: var(--ink); }
+.nav-cta {
+  font-size: var(--text-xs);
+  font-weight: 600;
+  letter-spacing: 0.07em;
+  text-transform: uppercase;
+  color: white;
+  background: linear-gradient(135deg, #00A3FF, #FF2D9E);
+  padding: var(--sp-2) var(--sp-4);
+  text-decoration: none;
+}
+
+/* HEADER */
+.header {
+  border-bottom: 3px solid var(--ink);
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: var(--sp-8);
+  padding: var(--sp-16) 0 var(--sp-12);
+  align-items: end;
+}
+@media (max-width: 760px) { .header { grid-template-columns: 1fr; } }
+
+.header-label {
+  font-size: var(--text-xs);
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--accent);
+  margin-bottom: var(--sp-4);
+}
+.header h1 {
+  font-size: clamp(2rem, 5vw, 3.5rem);
+  font-weight: 700;
+  line-height: 1.1;
+  letter-spacing: -0.02em;
+  margin-bottom: var(--sp-6);
+}
+.header h1 em {
+  font-style: normal;
+  color: var(--accent);
+}
+.header-meta {
+  font-size: var(--text-sm);
+  color: var(--ink-muted);
+  display: flex;
+  flex-direction: column;
+  gap: var(--sp-3);
+}
+.header-meta strong {
+  color: var(--ink);
+  display: block;
+  font-size: var(--text-xs);
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+}
+.header-right {
+  display: flex;
+  flex-direction: column;
+  gap: var(--sp-6);
+  padding-bottom: var(--sp-4);
+}
+
+/* STATS BAND */
+.stats-band {
+  background: var(--ink);
+  color: white;
+  padding: var(--sp-10) 0;
+  margin: var(--sp-12) 0;
+}
+.stats-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  gap: var(--sp-8);
+}
+.stat { text-align: center; }
+.stat-number {
+  font-size: 2.5rem;
+  font-weight: 700;
+  line-height: 1;
+  margin-bottom: var(--sp-2);
+  background: linear-gradient(135deg, #FF2D9E, #00A3FF);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+.stat-label {
+  font-size: var(--text-xs);
+  font-weight: 500;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: rgba(255,255,255,0.6);
+}
+
+/* SECTION */
+.section { padding: var(--sp-16) 0; border-bottom: 1px solid var(--divider); }
+.section-label {
+  font-size: var(--text-xs);
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--accent);
+  margin-bottom: var(--sp-4);
+}
+.section h2 {
+  font-size: var(--text-2xl);
+  font-weight: 700;
+  letter-spacing: -0.02em;
+  margin-bottom: var(--sp-6);
+  line-height: 1.2;
+}
+.section p {
+  font-size: var(--text-md);
+  color: var(--ink-muted);
+  max-width: 680px;
+  margin-bottom: var(--sp-5);
+  line-height: 1.75;
+}
+
+/* TWO COL */
+.two-col {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: var(--sp-12);
+  align-items: start;
+}
+@media (max-width: 760px) { .two-col { grid-template-columns: 1fr; } }
+
+/* DELIVERABLES */
+.deliverable-list {
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: var(--sp-4);
+  margin-top: var(--sp-6);
+}
+.deliverable-list li {
+  display: flex;
+  gap: var(--sp-4);
+  padding: var(--sp-5);
+  background: white;
+  border-left: 3px solid var(--accent);
+}
+.deliverable-num {
+  font-size: var(--text-xs);
+  font-weight: 700;
+  color: var(--accent);
+  letter-spacing: 0.08em;
+  min-width: 2rem;
+  padding-top: 2px;
+}
+.deliverable-content strong {
+  display: block;
+  font-size: var(--text-sm);
+  font-weight: 700;
+  color: var(--ink);
+  margin-bottom: var(--sp-1);
+}
+.deliverable-content span {
+  font-size: var(--text-sm);
+  color: var(--ink-muted);
+}
+
+/* RESULT CALLOUT */
+.result-callout {
+  background: var(--ink);
+  color: white;
+  padding: var(--sp-10);
+  margin: var(--sp-12) 0;
+}
+.result-callout h3 {
+  color: white;
+  font-size: var(--text-xl);
+  font-weight: 700;
+  margin-bottom: var(--sp-6);
+  line-height: 1.3;
+}
+.result-callout h3 em {
+  font-style: normal;
+  background: linear-gradient(135deg, #FF2D9E, #00A3FF);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+.result-list {
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: var(--sp-3);
+}
+.result-list li {
+  display: flex;
+  gap: var(--sp-3);
+  font-size: var(--text-sm);
+  color: rgba(255,255,255,0.8);
+  line-height: 1.6;
+}
+.result-list li::before {
+  content: '→';
+  color: var(--accent);
+  flex-shrink: 0;
+  font-weight: 700;
+}
+
+/* TECH STACK */
+.tech-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+  gap: var(--sp-3);
+  margin-top: var(--sp-6);
+}
+.tech-item {
+  background: white;
+  border: 1px solid var(--divider);
+  padding: var(--sp-4);
+  text-align: center;
+  font-size: var(--text-xs);
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--ink);
+}
+
+/* BACK LINK */
+.back-section {
+  padding: var(--sp-12) 0;
+  text-align: center;
+}
+.back-link {
+  font-size: var(--text-sm);
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--ink);
+  text-decoration: none;
+  border-bottom: 2px solid var(--accent);
+  padding-bottom: 2px;
+}
+</style>
+</head>
+<body>
+
+<div class="page">
+  <nav class="nav">
+    <a href="index.html" class="nav-brand">Victoria<span>.</span></a>
+    <a href="index.html" class="nav-link">← Back to portfolio</a>
+    <a href="index.html#contact" class="nav-cta">Work With Me</a>
+  </nav>
+</div>
+
+<!-- HEADER -->
+<div class="page">
+  <header class="header reveal">
+    <div class="header-left">
+      <div class="header-label">Case Study — 03</div>
+      <h1>A broken library.<br><em>Rebuilt properly.</em></h1>
+      <p style="color: var(--ink-muted); font-size: var(--text-md); max-width: 520px; line-height: 1.7;">A sprawling, duplicated resources library with no single source of truth. Publishing anything took half a day. I redesigned the entire system from the ground up.</p>
+    </div>
+    <div class="header-right">
+      <div class="header-meta">
+        <div>
+          <strong>Sector</strong>
+          Third Sector / Education
+        </div>
+        <div>
+          <strong>Deliverable</strong>
+          Excel data system + automated CSV export pipeline
+        </div>
+        <div>
+          <strong>Outcome</strong>
+          Publishing time eliminated. Any team member can operate it.
+        </div>
+      </div>
+    </div>
+  </header>
+</div>
+
+<!-- STATS -->
+<div class="stats-band">
+  <div class="page">
+    <div class="stats-grid reveal">
+      <div class="stat">
+        <div class="stat-number">1</div>
+        <div class="stat-label">Source of truth (was many)</div>
+      </div>
+      <div class="stat">
+        <div class="stat-number">0</div>
+        <div class="stat-label">Manual publishing steps</div>
+      </div>
+      <div class="stat">
+        <div class="stat-number">100%</div>
+        <div class="stat-label">Team can operate independently</div>
+      </div>
+      <div class="stat">
+        <div class="stat-number">∞</div>
+        <div class="stat-label">Scalable without rebuilding</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- THE PROBLEM -->
+<div class="page">
+  <section class="section reveal">
+    <div class="two-col">
+      <div>
+        <div class="section-label">The problem</div>
+        <h2>Legacy chaos with no way out.</h2>
+        <p>The organisation had accumulated years of resources across multiple spreadsheets — different formats, inconsistent tagging, duplicated entries, no clear ownership. Nobody was sure which version of a document was current.</p>
+        <p>Publishing anything to the website meant manually reformatting data, copy-pasting between sheets, and exporting in a specific format that nobody had properly documented. It took hours. It was error-prone. It was the kind of process that only one person understood.</p>
+        <p>As the library grew, the problem compounded. More resources meant more duplication, more inconsistency, and more time lost.</p>
+      </div>
+      <div style="background: white; padding: 2rem; border-top: 3px solid var(--accent);">
+        <p style="font-size: 0.85rem; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; color: var(--accent); margin-bottom: 1rem;">What was going wrong</p>
+        <ul style="list-style: none; display: flex; flex-direction: column; gap: 0.75rem;">
+          <li style="display: flex; gap: 0.75rem; font-size: 0.9rem; color: var(--ink-muted);"><span style="color: #cc0000;">✕</span> Data spread across legacy sheets with no structure</li>
+          <li style="display: flex; gap: 0.75rem; font-size: 0.9rem; color: var(--ink-muted);"><span style="color: #cc0000;">✕</span> Duplicate entries throughout the library</li>
+          <li style="display: flex; gap: 0.75rem; font-size: 0.9rem; color: var(--ink-muted);"><span style="color: #cc0000;">✕</span> No documented publishing process</li>
+          <li style="display: flex; gap: 0.75rem; font-size: 0.9rem; color: var(--ink-muted);"><span style="color: #cc0000;">✕</span> Formatting manual and error-prone</li>
+          <li style="display: flex; gap: 0.75rem; font-size: 0.9rem; color: var(--ink-muted);"><span style="color: #cc0000;">✕</span> Only one person could operate the process</li>
+        </ul>
+      </div>
+    </div>
+  </section>
+
+  <!-- WHAT WAS BUILT -->
+  <section class="section reveal">
+    <div class="section-label">What was built</div>
+    <h2>One system. No complexity.</h2>
+    <ul class="deliverable-list">
+      <li>
+        <span class="deliverable-num">01</span>
+        <div class="deliverable-content">
+          <strong>Resources Master workbook</strong>
+          <span>A single source of truth for the entire library. Designed to prevent duplication at the point of entry, with consistent tagging, filtering, and background colour logic for easy navigation.</span>
+        </div>
+      </li>
+      <li>
+        <span class="deliverable-num">02</span>
+        <div class="deliverable-content">
+          <strong>Squarespace Export workbook</strong>
+          <span>A linked export sheet that automatically generates a CSV in the exact format required for direct Squarespace import. What previously took hours of reformatting now takes one click.</span>
+        </div>
+      </li>
+      <li>
+        <span class="deliverable-num">03</span>
+        <div class="deliverable-content">
+          <strong>Legacy data migration</strong>
+          <span>Full audit and migration of existing legacy sheets — cleaning, deduplication, and restructuring into the new master format without losing any existing content.</span>
+        </div>
+      </li>
+      <li>
+        <span class="deliverable-num">04</span>
+        <div class="deliverable-content">
+          <strong>Process documentation</strong>
+          <span>Full written documentation of how to use the system — so any team member can add resources, maintain the library, and publish to the website without technical knowledge.</span>
+        </div>
+      </li>
+    </ul>
+  </section>
+</div>
+
+<!-- RESULT CALLOUT -->
+<div class="result-callout">
+  <div class="page">
+    <h3>The result: a library anyone can <em>actually use.</em></h3>
+    <ul class="result-list">
+      <li>Manual publishing process eliminated — export and import now takes under two minutes</li>
+      <li>Single master document means no more version conflicts or duplicate entries</li>
+      <li>Any team member can operate the full workflow without technical knowledge</li>
+      <li>Legacy data fully migrated and cleaned — nothing lost, everything structured</li>
+      <li>System scales — adding new resources takes seconds, not hours</li>
+    </ul>
+  </div>
+</div>
+
+<!-- TECH STACK -->
+<div class="page">
+  <section class="section reveal">
+    <div class="section-label">Tools & technologies</div>
+    <h2>Built with.</h2>
+    <div class="tech-grid">
+      <div class="tech-item">Microsoft Excel</div>
+      <div class="tech-item">Data Pipelines</div>
+      <div class="tech-item">CSV Automation</div>
+      <div class="tech-item">Squarespace</div>
+      <div class="tech-item">Process Design</div>
+      <div class="tech-item">Systems Thinking</div>
+      <div class="tech-item">Data Migration</div>
+      <div class="tech-item">Documentation</div>
+    </div>
+  </section>
+
+  <div class="back-section">
+    <a href="index.html#work" class="back-link">← View all case studies</a>
+  </div>
+</div>
+
+<script>
+  const observer = new IntersectionObserver(entries => {
+    entries.forEach(e => { if (e.isIntersecting) e.target.classList.add('visible'); });
+  }, { threshold: 0.1 });
+  document.querySelectorAll('.reveal').forEach(el => observer.observe(el));
+</script>
+</body>
+</html>

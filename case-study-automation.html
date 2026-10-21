@@ -1,0 +1,516 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Case Study — Content Automation Pipeline | Victoria Denham</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Poppins:ital,wght@0,300;0,400;0,500;0,600;0,700;1,400&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg:       #F9F5ED;
+  --ink:      #252F38;
+  --surface:  #F2DAAC;
+  --gold:     #D9A13B;
+  --red:      #1A1A2E;
+  --accent:   #00A3FF;
+  --pink:     #FF2D9E;
+  --olive:    #2D4A6B;
+  --font:     'Poppins', system-ui, sans-serif;
+
+  --text-xs:  0.75rem;
+  --text-sm:  0.875rem;
+  --text-md:  1.0625rem;
+  --text-lg:  1.375rem;
+  --text-xl:  1.875rem;
+  --text-2xl: 2.5rem;
+  --text-3xl: 3rem;
+
+  --sp-1: 0.25rem;  --sp-2: 0.5rem;   --sp-3: 0.75rem;  --sp-4: 1rem;
+  --sp-5: 1.25rem;  --sp-6: 1.5rem;   --sp-8: 2rem;     --sp-10: 2.5rem;
+  --sp-12: 3rem;    --sp-16: 4rem;    --sp-20: 5rem;
+
+  --divider:       color-mix(in srgb, var(--ink) 12%, transparent);
+  --divider-light: color-mix(in srgb, var(--ink) 7%,  transparent);
+  --ink-muted:     color-mix(in srgb, var(--ink) 50%, transparent);
+  --ink-faint:     color-mix(in srgb, var(--ink) 35%, transparent);
+}
+
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+html { font-size: 100%; scroll-behavior: smooth; }
+body {
+  font-family: var(--font);
+  font-size: var(--text-md);
+  font-weight: 400;
+  line-height: 1.65;
+  color: var(--ink);
+  background: var(--bg);
+  -webkit-font-smoothing: antialiased;
+  position: relative;
+}
+body::before {
+  content: '';
+  position: fixed;
+  inset: 0;
+  background-image: url('../../ClearPath/Website/texture.jpg');
+  background-size: cover;
+  background-repeat: repeat;
+  opacity: 0.25;
+  pointer-events: none;
+  z-index: 0;
+}
+body > * { position: relative; z-index: 1; }
+h1, h2, h3, h4 { font-family: var(--font); color: var(--ink); }
+a { color: var(--accent); }
+strong { font-weight: 700; }
+
+.reveal { opacity: 0; transform: translateY(18px); transition: opacity .5s ease, transform .5s ease; }
+.reveal.visible { opacity: 1; transform: none; }
+
+.page { max-width: 1200px; margin: 0 auto; padding: 0 var(--sp-8); }
+@media (max-width: 600px) { .page { padding: 0 var(--sp-4); } }
+
+/* NAV */
+.nav {
+  display: flex;
+  align-items: center;
+  gap: var(--sp-6);
+  padding: var(--sp-4) 0;
+  border-bottom: 1px solid var(--divider);
+  flex-wrap: wrap;
+}
+.nav-brand {
+  font-size: 1.1rem;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+  color: var(--ink);
+  margin-right: auto;
+  text-decoration: none;
+}
+.nav-brand span {
+  background: linear-gradient(135deg, #00A3FF, #FF2D9E);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+.nav-link {
+  font-size: var(--text-xs);
+  font-weight: 600;
+  letter-spacing: 0.07em;
+  text-transform: uppercase;
+  text-decoration: none;
+  color: var(--ink-muted);
+}
+.nav-link:hover { color: var(--ink); }
+.nav-cta {
+  font-size: var(--text-xs);
+  font-weight: 600;
+  letter-spacing: 0.07em;
+  text-transform: uppercase;
+  color: white;
+  background: linear-gradient(135deg, #00A3FF, #FF2D9E);
+  padding: var(--sp-2) var(--sp-4);
+  text-decoration: none;
+}
+
+/* HEADER */
+.header {
+  border-bottom: 3px solid var(--ink);
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: var(--sp-8);
+  padding: var(--sp-16) 0 var(--sp-12);
+  align-items: end;
+}
+@media (max-width: 760px) { .header { grid-template-columns: 1fr; } }
+
+.header-label {
+  font-size: var(--text-xs);
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--accent);
+  margin-bottom: var(--sp-4);
+}
+.header h1 {
+  font-size: clamp(2rem, 5vw, 3.5rem);
+  font-weight: 700;
+  line-height: 1.1;
+  letter-spacing: -0.02em;
+  margin-bottom: var(--sp-6);
+}
+.header h1 em {
+  font-style: normal;
+  color: var(--accent);
+}
+.header-meta {
+  font-size: var(--text-sm);
+  color: var(--ink-muted);
+  display: flex;
+  flex-direction: column;
+  gap: var(--sp-3);
+}
+.header-meta strong {
+  color: var(--ink);
+  display: block;
+  font-size: var(--text-xs);
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+}
+.header-right {
+  display: flex;
+  flex-direction: column;
+  gap: var(--sp-6);
+  padding-bottom: var(--sp-4);
+}
+
+/* STATS BAND */
+.stats-band {
+  background: var(--ink);
+  color: white;
+  padding: var(--sp-10) 0;
+  margin: var(--sp-12) 0;
+}
+.stats-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  gap: var(--sp-8);
+}
+.stat { text-align: center; }
+.stat-number {
+  font-size: 2.5rem;
+  font-weight: 700;
+  line-height: 1;
+  margin-bottom: var(--sp-2);
+  background: linear-gradient(135deg, #00A3FF, #FF2D9E);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+.stat-label {
+  font-size: var(--text-xs);
+  font-weight: 500;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: rgba(255,255,255,0.6);
+}
+
+/* SECTION */
+.section { padding: var(--sp-16) 0; border-bottom: 1px solid var(--divider); }
+.section-label {
+  font-size: var(--text-xs);
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--accent);
+  margin-bottom: var(--sp-4);
+}
+.section h2 {
+  font-size: var(--text-2xl);
+  font-weight: 700;
+  letter-spacing: -0.02em;
+  margin-bottom: var(--sp-6);
+  line-height: 1.2;
+}
+.section p {
+  font-size: var(--text-md);
+  color: var(--ink-muted);
+  max-width: 680px;
+  margin-bottom: var(--sp-5);
+  line-height: 1.75;
+}
+
+/* TWO COL */
+.two-col {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: var(--sp-12);
+  align-items: start;
+}
+@media (max-width: 760px) { .two-col { grid-template-columns: 1fr; } }
+
+/* DELIVERABLES */
+.deliverable-list {
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: var(--sp-4);
+  margin-top: var(--sp-6);
+}
+.deliverable-list li {
+  display: flex;
+  gap: var(--sp-4);
+  padding: var(--sp-5);
+  background: white;
+  border-left: 3px solid var(--accent);
+}
+.deliverable-num {
+  font-size: var(--text-xs);
+  font-weight: 700;
+  color: var(--accent);
+  letter-spacing: 0.08em;
+  min-width: 2rem;
+  padding-top: 2px;
+}
+.deliverable-content strong {
+  display: block;
+  font-size: var(--text-sm);
+  font-weight: 700;
+  color: var(--ink);
+  margin-bottom: var(--sp-1);
+}
+.deliverable-content span {
+  font-size: var(--text-sm);
+  color: var(--ink-muted);
+}
+
+/* RESULT CALLOUT */
+.result-callout {
+  background: var(--ink);
+  color: white;
+  padding: var(--sp-10);
+  margin: var(--sp-12) 0;
+}
+.result-callout h3 {
+  color: white;
+  font-size: var(--text-xl);
+  font-weight: 700;
+  margin-bottom: var(--sp-6);
+  line-height: 1.3;
+}
+.result-callout h3 em {
+  font-style: normal;
+  background: linear-gradient(135deg, #00A3FF, #FF2D9E);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+.result-list {
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: var(--sp-3);
+}
+.result-list li {
+  display: flex;
+  gap: var(--sp-3);
+  font-size: var(--text-sm);
+  color: rgba(255,255,255,0.8);
+  line-height: 1.6;
+}
+.result-list li::before {
+  content: '→';
+  color: var(--accent);
+  flex-shrink: 0;
+  font-weight: 700;
+}
+
+/* TECH STACK */
+.tech-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+  gap: var(--sp-3);
+  margin-top: var(--sp-6);
+}
+.tech-item {
+  background: white;
+  border: 1px solid var(--divider);
+  padding: var(--sp-4);
+  text-align: center;
+  font-size: var(--text-xs);
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--ink);
+}
+
+/* BACK LINK */
+.back-section {
+  padding: var(--sp-12) 0;
+  text-align: center;
+}
+.back-link {
+  font-size: var(--text-sm);
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--ink);
+  text-decoration: none;
+  border-bottom: 2px solid var(--accent);
+  padding-bottom: 2px;
+}
+</style>
+</head>
+<body>
+
+<div class="page">
+  <nav class="nav">
+    <a href="index.html" class="nav-brand">Victoria<span>.</span></a>
+    <a href="index.html" class="nav-link">← Back to portfolio</a>
+    <a href="index.html#contact" class="nav-cta">Work With Me</a>
+  </nav>
+</div>
+
+<!-- HEADER -->
+<div class="page">
+  <header class="header reveal">
+    <div class="header-left">
+      <div class="header-label">Case Study — 01</div>
+      <h1>Hours of manual work.<br><em>Automated.</em></h1>
+      <p style="color: var(--ink-muted); font-size: var(--text-md); max-width: 520px; line-height: 1.7;">A growing organisation was losing hours every week to copy-paste content management. I built the system that made it stop.</p>
+    </div>
+    <div class="header-right">
+      <div class="header-meta">
+        <div>
+          <strong>Sector</strong>
+          Third Sector / Advocacy
+        </div>
+        <div>
+          <strong>Deliverable</strong>
+          Python automation + Excel workflow system
+        </div>
+        <div>
+          <strong>Outcome</strong>
+          Manual process eliminated. Same-day approvals.
+        </div>
+      </div>
+    </div>
+  </header>
+</div>
+
+<!-- STATS -->
+<div class="stats-band">
+  <div class="page">
+    <div class="stats-grid reveal">
+      <div class="stat">
+        <div class="stat-number">100%</div>
+        <div class="stat-label">Manual copy-paste eliminated</div>
+      </div>
+      <div class="stat">
+        <div class="stat-number">Days → Hours</div>
+        <div class="stat-label">Approval time reduced</div>
+      </div>
+      <div class="stat">
+        <div class="stat-number">∞</div>
+        <div class="stat-label">Reusable — runs forever</div>
+      </div>
+      <div class="stat">
+        <div class="stat-number">1</div>
+        <div class="stat-label">Source of truth, not many</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- THE PROBLEM -->
+<div class="page">
+  <section class="section reveal">
+    <div class="two-col">
+      <div>
+        <div class="section-label">The problem</div>
+        <h2>A manual process held together with hope.</h2>
+        <p>Every week, staff were copying quotes and testimonials between a master spreadsheet, an approval document, and the live website. There was no single source of truth. Duplicates appeared constantly. Nobody was sure which version was current.</p>
+        <p>The approval process — getting content signed off before it went live — had no structure. It lived in email threads and verbal conversations. Things slipped through. Things got published twice. Things disappeared entirely.</p>
+        <p>The organisation was growing. The process wasn't. Something had to change.</p>
+      </div>
+      <div style="background: white; padding: 2rem; border-top: 3px solid var(--accent);">
+        <p style="font-size: 0.85rem; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; color: var(--accent); margin-bottom: 1rem;">What was going wrong</p>
+        <ul style="list-style: none; display: flex; flex-direction: column; gap: 0.75rem;">
+          <li style="display: flex; gap: 0.75rem; font-size: 0.9rem; color: var(--ink-muted);"><span style="color: #cc0000;">✕</span> Content duplicated across 3+ documents</li>
+          <li style="display: flex; gap: 0.75rem; font-size: 0.9rem; color: var(--ink-muted);"><span style="color: #cc0000;">✕</span> No clear approval workflow</li>
+          <li style="display: flex; gap: 0.75rem; font-size: 0.9rem; color: var(--ink-muted);"><span style="color: #cc0000;">✕</span> Website and master list out of sync</li>
+          <li style="display: flex; gap: 0.75rem; font-size: 0.9rem; color: var(--ink-muted);"><span style="color: #cc0000;">✕</span> Hours lost to manual data entry weekly</li>
+          <li style="display: flex; gap: 0.75rem; font-size: 0.9rem; color: var(--ink-muted);"><span style="color: #cc0000;">✕</span> No way to scale without adding headcount</li>
+        </ul>
+      </div>
+    </div>
+  </section>
+
+  <!-- WHAT WAS BUILT -->
+  <section class="section reveal">
+    <div class="section-label">What was built</div>
+    <h2>A system that thinks for itself.</h2>
+    <ul class="deliverable-list">
+      <li>
+        <span class="deliverable-num">01</span>
+        <div class="deliverable-content">
+          <strong>Python scraping script</strong>
+          <span>Automated extraction of all existing website quote blocks — pulling live data, cleaning it, and importing it into a structured spreadsheet without any manual input.</span>
+        </div>
+      </li>
+      <li>
+        <span class="deliverable-num">02</span>
+        <div class="deliverable-content">
+          <strong>Master content workbook</strong>
+          <span>A single source of truth for all content. Linked to the approval sheet and export pipeline, so changes propagate automatically. No more copy-pasting between documents.</span>
+        </div>
+      </li>
+      <li>
+        <span class="deliverable-num">03</span>
+        <div class="deliverable-content">
+          <strong>Approval workflow system</strong>
+          <span>A dedicated review tab with status tracking, tone categorisation, use-case tagging, and dropdown controls. Approvals that previously took days now happen in a single structured session.</span>
+        </div>
+      </li>
+      <li>
+        <span class="deliverable-num">04</span>
+        <div class="deliverable-content">
+          <strong>Automated CSV export pipeline</strong>
+          <span>A linked export workbook that generates a publication-ready CSV in the exact format required for direct website import. One click. No reformatting.</span>
+        </div>
+      </li>
+      <li>
+        <span class="deliverable-num">05</span>
+        <div class="deliverable-content">
+          <strong>Deduplication logic</strong>
+          <span>Automated flagging of duplicate or near-duplicate entries across the full dataset, preventing repeated content from reaching the live site.</span>
+        </div>
+      </li>
+    </ul>
+  </section>
+</div>
+
+<!-- RESULT CALLOUT -->
+<div class="result-callout">
+  <div class="page">
+    <h3>The result: a process that <em>runs itself.</em></h3>
+    <ul class="result-list">
+      <li>Hours of weekly manual work eliminated entirely — the Python script handles extraction automatically</li>
+      <li>One master document now controls everything — no version conflicts, no duplicates, no confusion</li>
+      <li>Approval time reduced from days of email chains to a structured same-day workflow</li>
+      <li>The reusable script means the system can be re-run at any time without rebuilding</li>
+      <li>Any team member can operate the workflow without technical knowledge</li>
+    </ul>
+  </div>
+</div>
+
+<!-- TECH STACK -->
+<div class="page">
+  <section class="section reveal">
+    <div class="section-label">Tools & technologies</div>
+    <h2>Built with.</h2>
+    <div class="tech-grid">
+      <div class="tech-item">Python</div>
+      <div class="tech-item">Web Scraping</div>
+      <div class="tech-item">Microsoft Excel</div>
+      <div class="tech-item">Data Pipelines</div>
+      <div class="tech-item">Workflow Design</div>
+      <div class="tech-item">CSV Automation</div>
+      <div class="tech-item">Process Design</div>
+      <div class="tech-item">Systems Thinking</div>
+    </div>
+  </section>
+
+  <div class="back-section">
+    <a href="index.html#work" class="back-link">← View all case studies</a>
+  </div>
+</div>
+
+<script>
+  const observer = new IntersectionObserver(entries => {
+    entries.forEach(e => { if (e.isIntersecting) e.target.classList.add('visible'); });
+  }, { threshold: 0.1 });
+  document.querySelectorAll('.reveal').forEach(el => observer.observe(el));
+</script>
+</body>
+</html>
