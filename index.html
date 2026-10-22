@@ -1274,16 +1274,65 @@
         <div class="part-label">Get in touch</div>
         <button class="modal-close" id="modal-close">✕</button>
       </div>
-      <div class="intake-form">
-        <p>Email me about your project, collaboration or question.</p>
-        <a class="btn-primary" href="mailto:hello@victoriadenham.co.uk">Email hello@victoriadenham.co.uk</a>
-        <p style="font-size:0.85rem;line-height:1.6;">This opens your email app. You can also copy the address above.</p>
-        <details style="font-size:0.85rem;line-height:1.6;">
-          <summary>Privacy and enquiries</summary>
-          <p>Emails to Victoria Denham are received through Fasthosts and Gmail and used to respond to your enquiry. Please email hello@victoriadenham.co.uk with questions about your personal information.</p>
-          <p>This website does not use analytics or advertising cookies. Fonts are loaded from Google Fonts, which receives your IP address when your browser requests them.</p>
-        </details>
-      </div>
+      <form class="intake-form" id="intake-form" method="post" action="https://script.google.com/macros/s/AKfycbz3aE-NQdcb9ar8YtO-U9gEzsCQc8Y95DHV-byVr3JS4FLaJ7Fpfj0217n2v9Z3MKxmDA/exec" target="contact-delivery-frame">
+        <input type="hidden" name="requestId">
+        <input type="hidden" name="pageOrigin">
+        <div aria-hidden="true" style="position:absolute;left:-10000px;width:1px;height:1px;overflow:hidden;">
+          <label>Leave this field empty<input type="text" name="website" tabindex="-1" autocomplete="off"></label>
+        </div>
+        <div class="form-row">
+          <div class="form-field">
+            <label>Name</label>
+            <input type="text" name="name" maxlength="160" required placeholder="Your name">
+          </div>
+          <div class="form-field">
+            <label>Email</label>
+            <input type="email" name="email" maxlength="254" required placeholder="your@email.com">
+          </div>
+        </div>
+        <div class="form-field">
+          <label>Organisation / project</label>
+          <input type="text" name="business" placeholder="Organisation, project or context">
+        </div>
+        <div class="form-field">
+          <label>What are you interested in?</label>
+          <select name="service">
+            <option value="">Select an area</option>
+            <option>Content and copy</option>
+            <option>Visual communication</option>
+            <option>Digital storytelling</option>
+            <option>Not sure yet</option>
+          </select>
+        </div>
+        <div class="form-field">
+          <label>Tell me a bit more</label>
+          <textarea name="project" rows="4" required maxlength="8000" placeholder="What needs to be clearer, easier to access or better communicated?"></textarea>
+        </div>
+        <div class="form-row">
+          <div class="form-field">
+            <label>Context</label>
+            <select name="budget">
+              <option value="">Select context</option>
+              <option>Job / collaboration</option>
+              <option>Small organisation</option>
+              <option>Advocacy / nonprofit</option>
+              <option>Creative project</option>
+            </select>
+          </div>
+          <div class="form-field">
+            <label>Timeline</label>
+            <select name="timeline">
+              <option value="">Select timeline</option>
+              <option>ASAP</option>
+              <option>Within a month</option>
+              <option>Flexible</option>
+            </select>
+          </div>
+        </div>
+        <button type="submit" class="btn-primary">Send message</button>
+        <p class="form-status" id="form-status" role="status" aria-live="polite"></p>
+        <p style="font-size:0.8rem;line-height:1.5;">Your details are sent through a Google Apps Script owned by Victoria Denham to hello@victoriadenham.co.uk, received through Fasthosts and Gmail, and used to respond to your enquiry. You can also <a href="mailto:hello@victoriadenham.co.uk">email me directly</a>.</p>
+      </form>
     </div>
   </div>
 
@@ -1299,6 +1348,7 @@
     </div>
   </footer>
 
+  <iframe name="contact-delivery-frame" title="Contact message delivery" hidden></iframe>
   <script>
     // ═══════════════════════════════════════
     // LAVA LAMP — floating blobs, mouse displacement
@@ -1677,6 +1727,47 @@
 
     document.querySelectorAll('#open-modal, .nav-cta, .hero-actions .btn-primary').forEach(btn => {
       btn.addEventListener('click', e => { e.preventDefault(); openModal(); });
+    });
+
+
+    // Submit to the receiver in a hidden frame and wait for its acknowledgement.
+    const contactForm = document.getElementById('intake-form');
+    const contactStatus = document.getElementById('form-status');
+    const contactButton = contactForm.querySelector('button[type="submit"]');
+    let contactRequestId = '';
+    let contactTimer;
+
+    contactForm.addEventListener('submit', function () {
+      if (!contactRequestId) {
+        contactRequestId = Array.from(crypto.getRandomValues(new Uint8Array(16)),
+          byte => byte.toString(16).padStart(2, '0')).join('');
+      }
+      this.elements.requestId.value = contactRequestId;
+      this.elements.pageOrigin.value = window.location.origin;
+      contactButton.disabled = true;
+      contactStatus.textContent = 'Sending...';
+      clearTimeout(contactTimer);
+      contactTimer = setTimeout(() => {
+        contactButton.disabled = false;
+        contactStatus.textContent = "Delivery has not been confirmed. Please try again or email hello@victoriadenham.co.uk.";
+      }, 45000);
+    });
+
+    window.addEventListener('message', function (event) {
+      if (!/^https:\/\/[a-z0-9-]+\.googleusercontent\.com$/.test(event.origin)
+          && event.origin !== 'https://script.google.com') return;
+      const result = event.data;
+      if (!result || result.type !== 'victoria-contact-result'
+          || !contactRequestId || result.requestId !== contactRequestId) return;
+      clearTimeout(contactTimer);
+      contactButton.disabled = false;
+      if (result.ok === true) {
+        contactStatus.textContent = "Sent. Thank you — I'll be in touch shortly.";
+        contactForm.reset();
+        contactRequestId = '';
+      } else {
+        contactStatus.textContent = "Your message could not be sent. Please check the details and try again, or email hello@victoriadenham.co.uk.";
+      }
     });
 
   </script>
