@@ -1743,6 +1743,51 @@
         video.play();
       });
 
+      // Measure time actually played; seeking forward does not count as watching.
+      let videoStarted = false;
+      let videoHalfWatched = false;
+      let videoCompleted = false;
+      let lastVideoTime = null;
+      const watchedSeconds = new Set();
+      function videoEvent(name) {
+        trackEvent(name, {
+          video_title: 'Victoria Denham intro',
+          video_provider: 'self_hosted',
+          video_duration: Math.round(video.duration || 0),
+          video_current_time: Math.round(video.currentTime || 0)
+        });
+      }
+      video.addEventListener('play', () => {
+        lastVideoTime = video.currentTime;
+        if (!videoStarted) {
+          videoStarted = true;
+          videoEvent('intro_video_play');
+        }
+      });
+      video.addEventListener('seeking', () => { lastVideoTime = null; });
+      video.addEventListener('seeked', () => { lastVideoTime = video.currentTime; });
+      video.addEventListener('timeupdate', () => {
+        const now = video.currentTime;
+        if (!video.seeking && lastVideoTime !== null && now > lastVideoTime
+            && now - lastVideoTime < 2) {
+          for (let tick = Math.floor(lastVideoTime * 10); tick < Math.floor(now * 10); tick++) {
+            watchedSeconds.add(tick);
+          }
+          if (!videoHalfWatched && Number.isFinite(video.duration) && video.duration > 0
+              && watchedSeconds.size / 10 >= video.duration / 2) {
+            videoHalfWatched = true;
+            videoEvent('intro_video_50_percent');
+          }
+        }
+        lastVideoTime = now;
+      });
+      video.addEventListener('ended', () => {
+        if (!videoCompleted) {
+          videoCompleted = true;
+          videoEvent('intro_video_complete');
+        }
+      });
+
       video.addEventListener('play', () => phone.classList.add('is-playing'));
       video.addEventListener('pause', () => phone.classList.remove('is-playing'));
       video.addEventListener('ended', () => phone.classList.remove('is-playing'));
