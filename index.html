@@ -12,7 +12,43 @@
   <meta name="twitter:card" content="summary_large_image">
   <meta name="twitter:image" content="https://victoriadenham.co.uk/og-image.png">
   <link rel="icon" type="image/svg+xml" href="favicon.svg">
-<link rel="preconnect" href="https://fonts.googleapis.com">
+  <!-- Google tag (gtag.js) -->
+  <script async src="https://www.googletagmanager.com/gtag/js?id=G-SCN7SV5FKL"></script>
+  <script>
+    window.dataLayer = window.dataLayer || [];
+    function gtag(){dataLayer.push(arguments);}
+    gtag('js', new Date());
+    gtag('config', 'G-SCN7SV5FKL');
+
+    const outreachParams = new URLSearchParams(window.location.search);
+    const outreachAttribution = {
+      utm_source: outreachParams.get('utm_source') || '',
+      utm_medium: outreachParams.get('utm_medium') || '',
+      utm_campaign: outreachParams.get('utm_campaign') || '',
+      utm_content: outreachParams.get('utm_content') || ''
+    };
+
+    if (outreachAttribution.utm_campaign) {
+      sessionStorage.setItem('outreachAttribution', JSON.stringify(outreachAttribution));
+      gtag('event', 'outreach_visit', {
+        event_category: 'business_development',
+        campaign: outreachAttribution.utm_campaign,
+        content: outreachAttribution.utm_content
+      });
+    }
+
+    function getOutreachAttribution() {
+      try {
+        return JSON.parse(sessionStorage.getItem('outreachAttribution')) || outreachAttribution;
+      } catch (err) {
+        return outreachAttribution;
+      }
+    }
+  </script>
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Rajdhani:wght@300;400;500;600;700&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
   <style>
@@ -1718,7 +1754,15 @@
     const overlay = document.getElementById('modal-overlay');
 
 
-    function openModal()  { overlay.classList.add('open');    document.body.style.overflow = 'hidden'; }
+    function trackEvent(name, details = {}) {
+      if (typeof gtag !== 'function') return;
+      gtag('event', name, {
+        event_category: 'business_development',
+        ...getOutreachAttribution(),
+        ...details
+      });
+    }
+    function openModal()  { overlay.classList.add('open');    document.body.style.overflow = 'hidden'; trackEvent('contact_modal_opened'); }
     function closeModal() { overlay.classList.remove('open'); document.body.style.overflow = ''; }
 
     document.getElementById('modal-close').addEventListener('click', closeModal);
@@ -1729,6 +1773,13 @@
       btn.addEventListener('click', e => { e.preventDefault(); openModal(); });
     });
 
+
+    document.querySelectorAll('a[href^="mailto:"]').forEach(link => {
+      link.addEventListener('click', () => trackEvent('email_link_clicked'));
+    });
+    document.querySelectorAll('a[href*="linkedin.com"]').forEach(link => {
+      link.addEventListener('click', () => trackEvent('linkedin_clicked'));
+    });
 
     // Submit to the receiver in a hidden frame and wait for its acknowledgement.
     const contactForm = document.getElementById('intake-form');
@@ -1763,6 +1814,7 @@
       contactButton.disabled = false;
       if (result.ok === true) {
         contactStatus.textContent = "Sent. Thank you — I'll be in touch shortly.";
+        trackEvent('enquiry_submitted');
         contactForm.reset();
         contactRequestId = '';
       } else {
